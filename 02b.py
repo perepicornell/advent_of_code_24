@@ -1,5 +1,81 @@
 # Online Python compiler (interpreter) to run Python online.
 # Write Python 3 code in this online editor and run it.
+class NotSafe(Exception):
+    """Exception raised for custom error scenarios.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class Levels:
+    levels = []
+    safe_sum = 0
+    
+    def __init__(self, numbers):
+        self.numbers = numbers
+        self.fill_levels()
+        
+    def fill_levels(self):
+        lines = self.numbers.split("\n")
+        for line in lines:
+            if not line:
+                continue
+            self.levels.append([int(x) for x in line.split(" ")])
+        
+    def check_safe_levels(self):
+        for level in self.levels:
+            try:
+                self.check_safe_level(level)
+            except NotSafe as e:
+                safe = False
+                continue
+            self.safe_sum += 1
+    
+    def check_safe_level(self, level):
+        direction = self.get_level_direction(level)
+        if direction == "increasing":
+            self.check_increasing_numbers(level)
+        else:
+            self.check_decreasing_numbers(level)
+        
+    def check_increasing_numbers(self, level):
+        for i in range(len(level)):
+            if not i:
+                # Skipping first number
+                continue
+            current_num = level[i]
+            previous_num = level[i-1]
+            if not 1 <= current_num - previous_num <= 3:
+                raise NotSafe("Minimum difference should be between 1 and 3")
+            if current_num <= previous_num:
+                raise NotSafe("This level should be increasing but it's not.")
+
+    def check_decreasing_numbers(self, level):
+        for i in range(len(level)):
+            if not i:
+                # Skipping first number
+                continue
+            current_num = level[i]
+            previous_num = level[i-1]
+            if not 1 <= previous_num - current_num <= 3:
+                raise NotSafe("Minimum difference should be between 1 and 3")
+            if current_num >= previous_num:
+                raise NotSafe("This level should be increasing but it's not.")
+            
+    def get_level_direction(self, level):
+        if level[0] < level[1]:
+            return "increasing"
+        return "decreasing"
+        
+    def get_result(self):
+        self.check_safe_levels()
+        return self.safe_sum
+
 numbers = """
 1 4 5 8 11 12 9
 7 8 9 10 12 15 17 17
@@ -1002,82 +1078,6 @@ numbers = """
 94 93 92 91 90 87 85 83
 50 52 53 54 56 57 58 61
 """
-
-class NotSafe(Exception):
-    """Exception raised for custom error scenarios.
-
-    Attributes:
-        message -- explanation of the error
-    """
-
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
-
-class Levels:
-    levels = []
-    safe_sum = 0
-    
-    def __init__(self, numbers):
-        self.numbers = numbers
-        self.fill_levels()
-        
-    def fill_levels(self):
-        lines = self.numbers.split("\n")
-        for line in lines:
-            if not line:
-                continue
-            self.levels.append([int(x) for x in line.split(" ")])
-        
-    def check_safe_levels(self):
-        for level in self.levels:
-            try:
-                self.check_safe_level(level)
-            except NotSafe as e:
-                safe = False
-                continue
-            self.safe_sum += 1
-    
-    def check_safe_level(self, level):
-        direction = self.get_level_direction(level)
-        if direction == "increasing":
-            self.check_increasing_numbers(level)
-        else:
-            self.check_decreasing_numbers(level)
-        
-    def check_increasing_numbers(self, level):
-        for i in range(len(level)):
-            if not i:
-                # Skipping first number
-                continue
-            current_num = level[i]
-            previous_num = level[i-1]
-            if not 1 <= current_num - previous_num <= 3:
-                raise NotSafe("Minimum difference should be between 1 and 3")
-            if current_num <= previous_num:
-                raise NotSafe("This level should be increasing but it's not.")
-
-    def check_decreasing_numbers(self, level):
-        for i in range(len(level)):
-            if not i:
-                # Skipping first number
-                continue
-            current_num = level[i]
-            previous_num = level[i-1]
-            if not 1 <= previous_num - current_num <= 3:
-                raise NotSafe("Minimum difference should be between 1 and 3")
-            if current_num >= previous_num:
-                raise NotSafe("This level should be increasing but it's not.")
-            
-    def get_level_direction(self, level):
-        if level[0] < level[1]:
-            return "increasing"
-        return "decreasing"
-        
-    def get_result(self):
-        self.check_safe_levels()
-        return self.safe_sum
 
 result = Levels(numbers).get_result()
 print(result)
