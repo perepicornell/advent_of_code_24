@@ -24,8 +24,9 @@ class Levels:
             try:
                 self.check_safe_level(level)
             except NotSafe as e:
-                safe = False
-                continue
+                try:
+                    self.check_safe_level(level)
+                except NotSafe as e:                continue
             self.safe_sum += 1
     
     def check_safe_level(self, level):
@@ -43,8 +44,10 @@ class Levels:
             current_num = level[i]
             previous_num = level[i-1]
             if not 1 <= current_num - previous_num <= 3:
+                level.remove(level[i])
                 raise NotSafe("Minimum difference should be between 1 and 3")
             if current_num <= previous_num:
+                level.remove(level[i])
                 raise NotSafe("This level should be increasing but it's not.")
 
     def check_decreasing_numbers(self, level):
@@ -55,8 +58,10 @@ class Levels:
             current_num = level[i]
             previous_num = level[i-1]
             if not 1 <= previous_num - current_num <= 3:
+                level.remove(level[i])
                 raise NotSafe("Minimum difference should be between 1 and 3")
             if current_num >= previous_num:
+                level.remove(level[i])
                 raise NotSafe("This level should be increasing but it's not.")
             
     def get_level_direction(self, level):
