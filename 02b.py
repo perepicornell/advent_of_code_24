@@ -1,74 +1,68 @@
-class NotSafe(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
+class Level:
+    unsafe_number = None
+    
+    def __init__(self, numbers):
+        self.numbers = numbers
+        self.set_direction()
+
+    def is_safe(self):
+        method_name = f"check_{self.direction}_numbers"
+        for i in range(len(self.numbers)):
+            if not i:
+                # Skipping first number
+                continue
+            if not getattr(self, method_name)(
+                self.numbers[i], 
+                self.numbers[i-1]
+            ):
+                return False
+        return True
+        
+    def check_increasing_numbers(self, current_number, previous_number):
+        if (
+            1 <= current_number - previous_number <= 3
+        ):
+            return True
+        return False
+
+    def check_decreasing_numbers(self, current_number, previous_number):
+        if (
+            1 <= previous_number - current_number <= 3
+        ):
+            return True
+        return False
+        
+    def set_direction(self):
+        self.direction = "decreasing"
+        if self.numbers[0] < self.numbers[1]:
+            self.direction = "increasing"
+        
+    def remove_number(n):
+        self.numbers.remove(self.numbers[n])
 
 
 class Levels:
     levels = []
     safe_sum = 0
     
-    def __init__(self, numbers):
-        self.numbers = numbers
-        self.fill_levels()
+    def __init__(self, source):
+        self.fill_levels(source)
         
-    def fill_levels(self):
-        lines = self.numbers.split("\n")
+    def fill_levels(self, source):
+        lines = source.split("\n")
         for line in lines:
             if not line:
                 continue
-            self.levels.append([int(x) for x in line.split(" ")])
+            numbers = [int(x) for x in line.split(" ")]
+            self.levels.append(Level(numbers))
         
     def check_safe_levels(self):
         for level in self.levels:
-            try:
-                self.check_safe_level(level)
-            except NotSafe as e:
-                try:
-                    self.check_safe_level(level)
-                except NotSafe as e:                continue
+            if not level.is_safe():
+                #level.remove_not_safe_number()
+                continue
             self.safe_sum += 1
     
-    def check_safe_level(self, level):
-        direction = self.get_level_direction(level)
-        if direction == "increasing":
-            self.check_increasing_numbers(level)
-        else:
-            self.check_decreasing_numbers(level)
-        
-    def check_increasing_numbers(self, level):
-        for i in range(len(level)):
-            if not i:
-                # Skipping first number
-                continue
-            current_num = level[i]
-            previous_num = level[i-1]
-            if not 1 <= current_num - previous_num <= 3:
-                level.remove(level[i])
-                raise NotSafe("Minimum difference should be between 1 and 3")
-            if current_num <= previous_num:
-                level.remove(level[i])
-                raise NotSafe("This level should be increasing but it's not.")
-
-    def check_decreasing_numbers(self, level):
-        for i in range(len(level)):
-            if not i:
-                # Skipping first number
-                continue
-            current_num = level[i]
-            previous_num = level[i-1]
-            if not 1 <= previous_num - current_num <= 3:
-                level.remove(level[i])
-                raise NotSafe("Minimum difference should be between 1 and 3")
-            if current_num >= previous_num:
-                level.remove(level[i])
-                raise NotSafe("This level should be increasing but it's not.")
-            
-    def get_level_direction(self, level):
-        if level[0] < level[1]:
-            return "increasing"
-        return "decreasing"
-        
     def get_result(self):
         self.check_safe_levels()
         return self.safe_sum
