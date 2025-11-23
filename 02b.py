@@ -1,5 +1,5 @@
 class Level:
-    unsafe_number = None
+    unsafe_number_index = None
     
     def __init__(self, numbers):
         self.numbers = numbers
@@ -15,6 +15,7 @@ class Level:
                 self.numbers[i], 
                 self.numbers[i-1]
             ):
+                self.unsafe_number_index = i
                 return False
         return True
         
@@ -37,8 +38,10 @@ class Level:
         if self.numbers[0] < self.numbers[1]:
             self.direction = "increasing"
         
-    def remove_number(n):
-        self.numbers.remove(self.numbers[n])
+    def remove_unsafe_number(self):
+        if self.unsafe_number_index is None:
+            raise Exception("You cannot call this method while there is not an unsafe number set.")
+        self.numbers.pop(self.unsafe_number_index)
 
 
 class Levels:
@@ -59,8 +62,15 @@ class Levels:
     def check_safe_levels(self):
         for level in self.levels:
             if not level.is_safe():
-                #level.remove_not_safe_number()
-                continue
+                #print("unsafe level ")
+                #print(level.numbers)
+                level.remove_unsafe_number()
+                #print("after removing: ")
+                #print(level.numbers)                
+                if not level.is_safe():
+                    #print("2nd checked, still unsafe")
+                    continue
+            #print("safe")
             self.safe_sum += 1
     
     def get_result(self):
