@@ -1,5 +1,17 @@
 def run (rules, pages):
-  pass
+  rules = parse_rules(rules)
+  pages = parse_pages(pages)
+  print(pages)
+  
+def parse_rules(rules):
+    lines = rules.split("\n")
+    rules = [line.split("|") for line in lines]
+    return rules
+
+def parse_pages(pages):
+    lines = pages.split("\n")
+    pages = [line.split(",") for line in lines]
+    return pages
 
 rules = """56|37
 94|13
