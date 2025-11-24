@@ -1,6 +1,4 @@
 class Level:
-    unsafe_number_index = None
-    
     def __init__(self, numbers):
         self.numbers = numbers
         self.set_direction()
@@ -15,7 +13,6 @@ class Level:
                 self.numbers[i], 
                 self.numbers[i-1]
             ):
-                self.unsafe_number_index = i
                 return False
         return True
         
@@ -38,10 +35,18 @@ class Level:
         if self.numbers[0] < self.numbers[1]:
             self.direction = "increasing"
         
-    def remove_unsafe_number(self):
-        if self.unsafe_number_index is None:
-            raise Exception("You cannot call this method while there is not an unsafe number set.")
-        self.numbers.pop(self.unsafe_number_index)
+    def brute_force_unsafe_number(self):
+        if self.is_safe():
+            return True
+        from copy import deepcopy
+        numbers_backup = deepcopy(self.numbers)
+        for i in range(len(self.numbers)):
+            self.numbers = deepcopy(numbers_backup)
+            self.numbers.pop(i)
+            self.set_direction()
+            if self.is_safe():
+                return True
+        return False
 
 
 class Levels:
@@ -61,16 +66,8 @@ class Levels:
         
     def check_safe_levels(self):
         for level in self.levels:
-            if not level.is_safe():
-                #print("unsafe level ")
-                #print(level.numbers)
-                level.remove_unsafe_number()
-                #print("after removing: ")
-                #print(level.numbers)                
-                if not level.is_safe():
-                    #print("2nd checked, still unsafe")
-                    continue
-            #print("safe")
+            if not level.brute_force_unsafe_number():
+                continue
             self.safe_sum += 1
     
     def get_result(self):
