@@ -1,10 +1,6 @@
 class WordSoup:
-    l = 0
-    c = 0
-    words = []
     starting_positions = []
-    grid = []
-    
+
     def __init__(self, input):
         self.input = input.split("\n")
 
