@@ -1,22 +1,9 @@
-from dataclasses import dataclass
-
-@dataclass
-class FoundWord:
-    """
-    Each property contains the coordinates of each letter in a dictionary:
-    {l: c}
-    Where l is line and c column, both integers.
-    """
-    x: {}
-    m: {}
-    a: {}
-    s: {}
-
 class WordSoup:
     l = 0
     c = 0
     words = []
     starting_positions = []
+    grid = []
     
     def __init__(self, input):
         self.input = input.split("\n")
@@ -26,44 +13,25 @@ class WordSoup:
             for c, char in enumerate(self.input[l]):
                 if char == "X":
                     self.starting_positions.append((l,c))
-        #print(self.starting_positions)
-        
+
     def check_matching_words_from_x(self, x_position):
         l = x_position[0]
         c = x_position[1]
-        horizontal_left = [
-
-        ]
-        vertical_up = [
-        ]
-        vertical_down = [
-            (l + 1, c),
-            (l + 2, c),
-            (l + 3, c),
-        ]
-        diagonal_down_right = [
-            (l + 1, c + 1),
-            (l + 2, c + 2),
-            (l + 3, c + 3),
-        ]
-        diagonal_down_left = [
-            (l + 1, c - 1),
-            (l + 2, c - 2),
-            (l + 3, c - 3),
-        ]
-        diagonal_up_right = [
-            (l - 1, c + 1),
-            (l - 2, c + 2),
-            (l - 3, c + 3),
-        ]
-        diagonal_up_left = [
-            (l - 1, c - 1),
-            (l - 2, c - 2),
-            (l - 3, c - 3),
+        directions = [
+            "horizontal_right",
+            "horizontal_left",
+            "vertical_up",
+            "vertical_down",
+            "diagonal_down_right",
+            "diagonal_down_left",
+            "diagonal_up_right",
+            "diagonal_up_left",
         ]
         matches = 0
-        
-        print(self.input[x_position[0]][x_position[1]])
+        for direction in directions:
+            if getattr(self, f"check_{direction}")(l, c):
+                matches += 1
+        return matches
         
     def check_horizontal_right(self, l, c):
         return self.check_m_a_s(
@@ -86,36 +54,74 @@ class WordSoup:
             (l - 3, c),
         )
     
+    def check_vertical_down(self, l, c):
+        return self.check_m_a_s(
+            (l + 1, c),
+            (l + 2, c),
+            (l + 3, c),
+        )
+    
+    def check_diagonal_down_right(self, l, c):
+        return self.check_m_a_s(
+            (l + 1, c + 1),
+            (l + 2, c + 2),
+            (l + 3, c + 3),
+        )
+
+    def check_diagonal_down_left(self, l, c):
+        return self.check_m_a_s(
+            (l + 1, c - 1),
+            (l + 2, c - 2),
+            (l + 3, c - 3),
+        )
+
+    def check_diagonal_up_right(self, l, c):
+        return self.check_m_a_s(
+            (l - 1, c + 1),
+            (l - 2, c + 2),
+            (l - 3, c + 3),
+        )
+
+    def check_diagonal_up_left(self, l, c):
+        return self.check_m_a_s(
+            (l - 1, c - 1),
+            (l - 2, c - 2),
+            (l - 3, c - 3),
+        )
+
     def check_m_a_s(self, m, a, s):
         if(
-            self.input[m[0]][m[1]] == "M"
-            and self.input[a[0]][a[1]] == "A"
-            and self.input[s[0]][s[1]] == "S"
+            m[0] < 0 or m[1] < 0
+            or a[0] < 0 or a[1] < 0
+            or s[0] < 0 or s[1] < 0
+            or m[0] > len(self.input)
+            or a[0] > len(self.input)
+            or s[0] > len(self.input)
+            or m[1] > len(self.input[0])
+            or a[1] > len(self.input[0])
+            or s[1] > len(self.input[0])
         ):
-            return True
+            return False
+        try:
+            if(
+                self.input[m[0]][m[1]] == "M"
+                and self.input[a[0]][a[1]] == "A"
+                and self.input[s[0]][s[1]] == "S"
+            ):
+                return True
+        except IndexError:
+            pass
         return False
         
 def run(input):
     instance = WordSoup(input)
     instance.set_starting_positions()
+    total_matches = 0
     for x in instance.starting_positions:
-        instance.check_matching_words_from_x(x)
+        matches = instance.check_matching_words_from_x(x)
+        total_matches += matches
+    print(total_matches)
 
-    
-def ms_surrounding_x(line, column):
-    """
-    line and column are the coordinates of an X char.
-    If M's are found surrounding the X, we'll need:
-    - The position of the M.
-    - The direction that is taking.
-    
-    So in a future step, we can check the next 2 chars in the same direction to see if they're "AS".
-    
-    This functions returns a list of dictionaries with:
-    [
-        {l, c},
-    ]
-    """
 
 input = """SMMMXMASMSSSMSMMSAMXSSMMSXMMAMXMXXXSMMSXXAMAASMSSMSSSMSASMMMXSXSMMSSSMSMXSXMAMAAXAXMMAMXMMMMSXSASMXMASAAMAMXMXAMAXMAXAXSAMSMXMMMAMAASASXMAMX
 SAMSAMXSAAAAXMASXXMAXAAAXMSMMMSSMMMXAAMMSMASMMMAMAAAAASASAXSAMXSXMAAMAAMAMASAMXSMMMSMAMASAMXAAAAMXAMXMAMSAMAMMAMXMXMASMAXMXAAMASAMMSMASAMSSM
