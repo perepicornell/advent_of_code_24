@@ -1,17 +1,60 @@
-def run (rules, pages):
-  rules = parse_rules(rules)
-  pages = parse_pages(pages)
-  print(pages)
-  
+import math
+
+def run(rules, page_groups):
+    rules = parse_rules(rules)
+    page_groups = parse_pages(page_groups)
+    
+    """
+    In the example given, when is correct there's always a rule matching a pair of pages.
+    
+    That is:
+    For each group of pages, we take the numbers in pairs (overlapping them), and then we check if there's a rule matching that pair.
+    
+    If there's a rule matching all the pairs, the group of pages is correct.
+    """
+    
+    page_groups_in_pairs = divide_page_groups_in_pairs(
+        page_groups
+    )
+
+    correct_groups = []
+    for group in page_groups_in_pairs:
+        if check_group(group, rules):
+            correct_groups.append(group)
+
+    middle_pages = []
+    for group in correct_groups:
+        middle = math.ceil(len(group) / 2)
+        middle_pages.append(int(group[middle][0]))
+        
+    print(sum(middle_pages))
+        
+def check_group(group, rules):
+    for page_pair in group:
+        if page_pair not in rules:
+            return False
+    return True
+
 def parse_rules(rules):
     lines = rules.split("\n")
     rules = [line.split("|") for line in lines]
     return rules
 
-def parse_pages(pages):
-    lines = pages.split("\n")
+def parse_pages(page_groups):
+    lines = page_groups.split("\n")
     pages = [line.split(",") for line in lines]
     return pages
+    
+def divide_page_groups_in_pairs(page_groups):
+    page_groups_in_pairs = []
+    for group in page_groups:
+        page_pairs = []
+        for i in range(len(group)):
+            if not i:
+                continue
+            page_pairs.append([group[i - 1], group[i]])
+        page_groups_in_pairs.append(page_pairs)
+    return page_groups_in_pairs
 
 rules = """56|37
 94|13
