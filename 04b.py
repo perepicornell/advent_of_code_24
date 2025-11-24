@@ -7,21 +7,19 @@ class WordSoup:
     def set_starting_positions(self):
         for l in range(len(self.input)):
             for c, char in enumerate(self.input[l]):
-                if char == "X":
+                if char == "A":
                     self.starting_positions.append((l,c))
 
-    def check_matching_words_from_x(self, x_position):
-        l = x_position[0]
-        c = x_position[1]
+    def check_matching_words_from_a(self,a_position):
+        l = a_position[0]
+        c = a_position[1]
+        
+        # According to "M"'s position in relation to the A
         directions = [
-            "horizontal_right",
-            "horizontal_left",
-            "vertical_up",
-            "vertical_down",
-            "diagonal_down_right",
-            "diagonal_down_left",
-            "diagonal_up_right",
-            "diagonal_up_left",
+            "top",
+            "left",
+            "right",
+            "bottom",
         ]
         matches = 0
         for direction in directions:
@@ -29,84 +27,87 @@ class WordSoup:
                 matches += 1
         return matches
         
-    def check_horizontal_right(self, l, c):
-        return self.check_m_a_s(
-            (l, c + 1),
-            (l, c + 2),
-            (l, c + 3),
+    def check_top(self, l, c):
+        """
+        l, c are the A coordinates.
+        
+        M M
+         A
+        S S
+        """
+        return self.check_mas_cross(
+            m1=(l - 1, c - 1),
+            m2=(l - 1, c + 1),
+            a=(l, c),
+            s1=(l + 1, c - 1),
+            s2=(l + 1, c + 1),
         )
         
-    def check_horizontal_left(self, l, c):
-        return self.check_m_a_s(
-            (l, c + -1),
-            (l, c + -2),
-            (l, c + -3),
+    def check_left(self, l, c):
+        """
+        l, c are the A coordinates.
+        
+        M S
+         A
+        M S
+        """
+        return self.check_mas_cross(
+            m1=(l - 1, c - 1),
+            m2=(l + 1, c - 1),
+            a=(l, c),
+            s1=(l - 1, c + 1),
+            s2=(l + 1, c + 1),
         )
     
-    def check_vertical_up(self, l, c):
-        return self.check_m_a_s(
-            (l - 1, c),
-            (l - 2, c),
-            (l - 3, c),
+    def check_right(self, l, c):
+        """
+        l, c are the A coordinates.
+        
+        S M
+         A
+        S M
+        """
+        return self.check_mas_cross(
+            m1=(l - 1, c + 1),
+            m2=(l + 1, c + 1),
+            a=(l, c),
+            s1=(l - 1, c - 1),
+            s2=(l + 1, c - 1),
         )
     
-    def check_vertical_down(self, l, c):
-        return self.check_m_a_s(
-            (l + 1, c),
-            (l + 2, c),
-            (l + 3, c),
+    def check_bottom(self, l, c):
+        """
+        l, c are the A coordinates.
+        
+        S S
+         A
+        M M
+        """
+        return self.check_mas_cross(
+            m1=(l + 1, c - 1),
+            m2=(l + 1, c + 1),
+            a=(l, c),
+            s1=(l - 1, c - 1),
+            s2=(l - 1, c + 1),
         )
     
-    def check_diagonal_down_right(self, l, c):
-        return self.check_m_a_s(
-            (l + 1, c + 1),
-            (l + 2, c + 2),
-            (l + 3, c + 3),
-        )
-
-    def check_diagonal_down_left(self, l, c):
-        return self.check_m_a_s(
-            (l + 1, c - 1),
-            (l + 2, c - 2),
-            (l + 3, c - 3),
-        )
-
-    def check_diagonal_up_right(self, l, c):
-        return self.check_m_a_s(
-            (l - 1, c + 1),
-            (l - 2, c + 2),
-            (l - 3, c + 3),
-        )
-
-    def check_diagonal_up_left(self, l, c):
-        return self.check_m_a_s(
-            (l - 1, c - 1),
-            (l - 2, c - 2),
-            (l - 3, c - 3),
-        )
-
-    def check_m_a_s(self, m, a, s):
+    def check_mas_cross(self, m1, m2, a, s1, s2):
         if(
-            m[0] < 0 or m[1] < 0
-            or a[0] < 0 or a[1] < 0
-            or s[0] < 0 or s[1] < 0
-            or m[0] > len(self.input)
-            or a[0] > len(self.input)
-            or s[0] > len(self.input)
-            or m[1] > len(self.input[0])
-            or a[1] > len(self.input[0])
-            or s[1] > len(self.input[0])
+            a[0] < 1
+            or a[1] < 1
+            or a[0] > len(self.input) - 2
+            or a[1] > len(self.input[0]) - 2
         ):
             return False
-        try:
-            if(
-                self.input[m[0]][m[1]] == "M"
-                and self.input[a[0]][a[1]] == "A"
-                and self.input[s[0]][s[1]] == "S"
-            ):
-                return True
-        except IndexError:
-            pass
+
+        if(
+            self.input[m1[0]][m1[1]] == "M"
+            and self.input[m2[0]][m2[1]] == "M"
+            and self.input[a[0]][a[1]] == "A"
+            and self.input[s1[0]][s1[1]] == "S"
+            and self.input[s2[0]][s2[1]] == "S"
+        ):
+            return True
         return False
         
 def run(input):
@@ -114,7 +115,7 @@ def run(input):
     instance.set_starting_positions()
     total_matches = 0
     for x in instance.starting_positions:
-        matches = instance.check_matching_words_from_x(x)
+        matches = instance.check_matching_words_from_a(x)
         total_matches += matches
     print(total_matches)
 
