@@ -18,9 +18,18 @@ def run(rules, page_groups):
     )
 
     correct_groups = []
-    for group in page_groups_in_pairs:
-        if check_group(group, rules):
-            correct_groups.append(group)
+    for i in range(len(page_groups_in_pairs)):
+        new_group = get_valid_reordered_group(
+            page_groups_in_pairs[i],
+            rules,
+        )
+        if not new_group:
+            continue
+        if new_group != page_groups_in_pairs[i]:
+            page_groups_in_pairs[i] = new_group
+        correct_groups.append(
+            page_groups_in_pairs[i],
+        )
 
     middle_pages = []
     for group in correct_groups:
@@ -33,6 +42,21 @@ def check_group(group, rules):
     for page_pair in group:
         if page_pair not in rules:
             return False
+    return True
+    
+def get_valid_reordered_group(group, rules):
+    if check_group(group, rules):
+        return group
+    group_combinations = []
+    for i in range(len(group)):
+        page_pair = group[i]
+        flipped_pair = (page_pair[1], page_pair[0])
+        new_group = group
+        new_group[i] = flipped_pair
+        group_combinations.append[new_group]
+        for group in group_combinations:
+            if check_group(group, rules):
+                return group
     return True
 
 def parse_rules(rules):
